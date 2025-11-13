@@ -1,0 +1,37 @@
+# ナノバナナ用プロンプト：App 31「月の満ち欠け表示」
+
+## メイン画面の完成イメージ
+
+```
+Modern web application UI design for a moon phase app.
+Dark mode theme with deep navy blue to black gradient background.
+Realistic night sky with bright visible stars scattered naturally.
+
+Center: Large detailed moon illustration (40% of screen), showing half moon phase with realistic craters and shadows.
+The moon has a soft glow effect.
+
+Below moon:
+- Moon age display "月齢 14.5" in elegant white text
+- Phase name "上弦の月" in Japanese
+- Current date "2025年1月13日 (月)"
+
+Bottom section:
+- Left arrow button "←" for previous day
+- Center: Monthly calendar widget showing January 2025, dates with moon records marked with small moon icons
+- Right arrow button "→" for next day
+
+Bottom area:
+- AI section with sparkle icon ✨
+- "月の豆知識" and "観測アドバイス" cards with AI-generated content
+
+Color scheme: Dark blue (#1a1a2e), navy (#16213e), white text, soft yellow moon glow
+Typography: Clean modern Japanese font
+Style: Mystical, calming, astronomical app aesthetic
+Layout: Centered, spacious, mobile-friendly responsive design
+
+--ar 9:16 --style digital illustration --quality high
+```
+
+## 使い方
+このプロンプトをナノバナナにコピー&ペーストして画像生成してください。
+生成された画像を `complete-image.png` として保存してください。

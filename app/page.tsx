@@ -1,12 +1,16 @@
 'use client';
 
 import { useMoonPhase } from '@/hooks/useMoonPhase';
+import { useAIGeneration } from '@/hooks/useAIGeneration';
 import MoonCanvas from '@/components/MoonCanvas';
 import DateSelector from '@/components/DateSelector';
 import MoonInfo from '@/components/MoonInfo';
+import GenerateButton from '@/components/GenerateButton';
+import AIContentSection from '@/components/AIContentSection';
 
 export default function Home() {
   const { moonPhaseData, setDate } = useMoonPhase();
+  const { aiContent, isLoading, error, generate } = useAIGeneration();
 
   return (
     <main className="flex min-h-screen flex-col items-center p-8 gap-8 py-12">
@@ -28,6 +32,17 @@ export default function Home() {
         <MoonCanvas moonPhaseData={moonPhaseData} size={400} />
         <MoonInfo moonPhaseData={moonPhaseData} />
       </div>
+
+      {/* AI生成ボタン */}
+      <div className="w-full flex justify-center mt-8">
+        <GenerateButton
+          onClick={() => generate(moonPhaseData)}
+          isLoading={isLoading}
+        />
+      </div>
+
+      {/* AI生成コンテンツ */}
+      <AIContentSection content={aiContent} isLoading={isLoading} error={error} />
 
       {/* フッター */}
       <div className="text-center text-sm text-slate-500 mt-8">

@@ -2,33 +2,36 @@
 
 import { useMoonPhase } from '@/hooks/useMoonPhase';
 import MoonCanvas from '@/components/MoonCanvas';
+import DateSelector from '@/components/DateSelector';
+import MoonInfo from '@/components/MoonInfo';
 
 export default function Home() {
-  const { moonPhaseData } = useMoonPhase();
+  const { moonPhaseData, setDate } = useMoonPhase();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 gap-8">
+    <main className="flex min-h-screen flex-col items-center p-8 gap-8 py-12">
+      {/* ヘッダー */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">🌙 月の満ち欠け表示</h1>
-        <p className="text-xl text-slate-300 mb-2">
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">🌙 月の満ち欠け表示</h1>
+        <p className="text-xl text-slate-300">
           Moon Phase Viewer
         </p>
       </div>
 
-      <div className="flex flex-col items-center gap-4">
-        <MoonCanvas moonPhaseData={moonPhaseData} size={400} />
+      {/* 日付選択 */}
+      <div className="w-full max-w-md">
+        <DateSelector date={moonPhaseData.date} onDateChange={setDate} />
+      </div>
 
-        <div className="text-center space-y-2">
-          <p className="text-2xl font-semibold text-slate-100">
-            {moonPhaseData.phaseName}
-          </p>
-          <p className="text-lg text-slate-300">
-            月齢: {moonPhaseData.moonAge.toFixed(1)}日
-          </p>
-          <p className="text-sm text-slate-400">
-            照度: {(moonPhaseData.illumination * 100).toFixed(0)}%
-          </p>
-        </div>
+      {/* 月の表示 */}
+      <div className="flex flex-col items-center gap-6">
+        <MoonCanvas moonPhaseData={moonPhaseData} size={400} />
+        <MoonInfo moonPhaseData={moonPhaseData} />
+      </div>
+
+      {/* フッター */}
+      <div className="text-center text-sm text-slate-500 mt-8">
+        <p>月齢計算範囲: 1925年〜2125年</p>
       </div>
     </main>
   );

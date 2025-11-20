@@ -74,92 +74,115 @@ export default function MoonCanvas({ moonPhaseData, size = 400 }: MoonCanvasProp
 
     const centerX = size / 2;
     const centerY = size / 2;
-    const radius = (size * 0.72) / 2;
+    const radius = (size * 0.76) / 2; // 0.95 * 0.8 = 0.76
 
-    // 背景を外側と同じ色で塗りつぶす
-    ctx.fillStyle = '#0d1220';
-    ctx.fillRect(0, 0, size, size);
+    // 1. 背景をクリア（透明に）
+    ctx.clearRect(0, 0, size, size);
 
-    // 月の画像を円形にクリップして描画
+    // 2. 月のテクスチャを描画（ベース）
     ctx.save();
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
     ctx.clip();
-
-    // 月の画像を描画（円形にフィット）
     const imgSize = radius * 2;
-    ctx.drawImage(img, centerX - radius, centerY - radius, imgSize, imgSize);
-
+    // 画像を少し拡大して描画（月のテクスチャが画像の中央に小さく配置されている場合の対策）
+    const scale = 1.4; // 拡大率
+    const scaledSize = imgSize * scale;
+    const offset = (scaledSize - imgSize) / 2;
+    ctx.drawImage(img, centerX - radius - offset, centerY - radius - offset, scaledSize, scaledSize);
     ctx.restore();
 
-    // 球体の正確な陰影マスクをピクセル単位で計算
+    // 3. ピクセル操作で球体の陰影とマスクを適用
     const imageData = ctx.getImageData(0, 0, size, size);
     const data = imageData.data;
-    
+
     // 月齢から位相角を算出（0 = 新月, π = 満月）
     const synodicPeriod = 29.53058867;
     const normalizedAge =
       ((moonPhaseData.moonAge % synodicPeriod) + synodicPeriod) / synodicPeriod;
+    // 位相角: 0(新月) -> π(満月) -> 2π(新月)
+    // 新月のとき、太陽は月の向こう側(Z = -1)
+    // 満月のとき、太陽は月の手前側(Z = 1)
+    // 上弦のとき(0.25)、太陽は右側(X = 1)
     const phaseAngle = normalizedAge * Math.PI * 2;
-    
-    // 太陽光の方向ベクトル（無限遠からの平行光）
+
+    // 太陽光の方向ベクトル
+    // 新月(0): sin(0)=0, -cos(0)=-1 -> (0, 0, -1) 奥から手前へ光が来ない（奥が光源）
+    // 実際は地球から見て月が太陽と同じ方向にある。
+    // ここでの座標系: Z軸手前が正、X軸右が正。
+    // 月の表面法線(0,0,1)は手前。
+    // 新月: 太陽は奥にある -> 光源ベクトル(0,0,-1) -> 内積 -1 -> 暗い。OK。
+    // 満月: 太陽は手前にある -> 光源ベクトル(0,0,1) -> 内積 1 -> 明るい。OK。
+    // 上弦: 月齢7.4(0.25) -> sin(PI/2)=1, -cos(PI/2)=0 -> (1,0,0) -> 右から光。OK。
     const sunDirX = Math.sin(phaseAngle);
     const sunDirY = 0;
     const sunDirZ = -Math.cos(phaseAngle);
-    
-    // 各ピクセルについて球面の法線ベクトルを計算し、光の当たり具合を判定
+
+    // 環境光（地球照）
+    const ambientR = 30;
+    const ambientG = 32;
+    const ambientB = 40;
+
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
-        const dx = (x - centerX) / radius;  // X軸: 東西方向（-1〜1）
-        const dy = (y - centerY) / radius;  // Y軸: 南北極方向（-1〜1）
+        const dx = (x - centerX) / radius;
+        const dy = (y - centerY) / radius;
         const distSq = dx * dx + dy * dy;
-        
-        // 円の外側はスキップ
-        if (distSq > 1) continue;
-        
-        // 球面上の点の3D座標（Z座標を計算）
-        const dz = Math.sqrt(1 - distSq);
-        
-        // 法線ベクトル（球の表面に垂直）
-        const normalX = dx;
-        const normalY = dy;
-        const normalZ = dz;
-        
-        // 太陽光との内積（光の当たり具合）
-        const dotProduct = normalX * sunDirX + normalY * sunDirY + normalZ * sunDirZ;
-        
+
         const idx = (y * size + x) * 4;
-        
-        // 境界をぼんやりさせる（ペナンブラ）— 極付近は極小、赤道ではやや広め
-        const penumbra = 0.02 + 0.04 * (1 - Math.abs(dy));
-        let shadowStrength = 0;
-        if (dotProduct < 0) {
-          const ratio = Math.min(1, (-dotProduct) / penumbra);
-          shadowStrength = Math.pow(ratio, 1.2);
+
+        // 円の外側は透明にする
+        if (distSq >= 1.0) {
+          data[idx + 3] = 0; // アルファチャンネルを0に
+          continue;
         }
-        
-        if (shadowStrength > 0) {
-          // 影の部分（地球照で薄明るい）
-          const earthshineR = 0.15;
-          const earthshineG = 0.16;
-          const earthshineB = 0.2;
-          
-          data[idx] = data[idx] * (1 - shadowStrength) + data[idx] * earthshineR * shadowStrength;
-          data[idx + 1] = data[idx + 1] * (1 - shadowStrength) + data[idx + 1] * earthshineG * shadowStrength;
-          data[idx + 2] = data[idx + 2] * (1 - shadowStrength) + data[idx + 2] * earthshineB * shadowStrength;
-        } else {
-          // 太陽光が当たる部分（明るい）
-          const brightness = Math.max(0, dotProduct) * 0.35;
-          data[idx] = Math.min(255, data[idx] * (1 + brightness * 1.1));
-          data[idx + 1] = Math.min(255, data[idx + 1] * (1 + brightness));
-          data[idx + 2] = Math.min(255, data[idx + 2] * (1 + brightness * 0.8));
-        }
+
+        // 球面上の点の法線ベクトル (nx, ny, nz)
+        const nz = Math.sqrt(1.0 - distSq);
+        const nx = dx;
+        const ny = dy;
+
+        // 太陽光との内積（ランバート反射）
+        const dot = nx * sunDirX + ny * sunDirY + nz * sunDirZ;
+
+        // 周縁減光（Limb Darkening）効果
+        const limbFactor = Math.pow(nz, 0.6);
+
+        // テクスチャの色
+        const texR = data[idx];
+        const texG = data[idx + 1];
+        const texB = data[idx + 2];
+
+        // 滑らかな明暗の遷移（指数関数的なフォールオフ）
+        const shadowBrightness = 0.12; // 影の明るさ
+        const litBrightness = 1.5; // 明るい部分の明るさ（より明るく）
+
+        // 境界線の遷移幅を狭くする
+        const transitionZone = 0.18; // 遷移が起きる範囲（狭める）
+
+        // dotを遷移ゾーン内で0〜1に正規化
+        const normalizedDot = Math.max(0, Math.min(1, (dot + transitionZone) / (2 * transitionZone)));
+
+        // 高いべき乗でシャープな遷移を作る
+        const smoothFactor = Math.pow(normalizedDot, 5.0);
+
+        // 明るさを計算
+        const brightness = shadowBrightness + (litBrightness - shadowBrightness) * smoothFactor;
+
+        // 色調補正（青白く冷たい色味に）
+        const colorR = 0.85;
+        const colorG = 0.95;
+        const colorB = 1.2;
+
+        data[idx] = Math.min(255, texR * brightness * limbFactor * colorR);
+        data[idx + 1] = Math.min(255, texG * brightness * limbFactor * colorG);
+        data[idx + 2] = Math.min(255, texB * brightness * limbFactor * colorB);
       }
     }
-    
+
     ctx.putImageData(imageData, 0, 0);
 
-  }, [moonPhaseData.moonAge, currentIllumination, size]);
+  }, [moonPhaseData.moonAge, size]);
 
   return (
     <div

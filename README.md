@@ -58,9 +58,10 @@ To use AI-generated content, you'll need a Google AI Studio API key:
 
 ## 📸 Screenshots
 
-<!-- Add screenshots here -->
+![Moon Phase Viewer - New Moon](public/screenshot.png)
+*Moon Phase Viewer showing the new moon (月齢 0.1日)*
 
-## �️ Tech Stack
+## ️ Tech Stack
 
 - **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript 5](https://www.typescriptlang.org/)

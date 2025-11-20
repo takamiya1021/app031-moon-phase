@@ -98,22 +98,14 @@ export async function generateMoonContent(
   }
 
   try {
-    console.log('Calling Google AI API...');
+    console.log('Calling Google AI API with SDK...');
 
-    // Google AI Studio APIを使用（gemini-2.5-flashを使用）
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `日付: ${date}
+    // Google AI SDK を使用
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    const prompt = `日付: ${date}
 月齢: ${moonAge.toFixed(1)}日
 月の名称: ${phaseName}
 
@@ -126,27 +118,13 @@ export async function generateMoonContent(
 月の満ち欠けに合わせた癒し・前向きなメッセージを100文字程度で
 
 【観測アドバイス】
-月の観測に適した時間帯とヒントを100文字程度で`,
-                },
-              ],
-            },
-          ],
-        }),
-      }
-    );
+月の観測に適した時間帯とヒントを100文字程度で`;
 
-    console.log('API Response status:', response.status);
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API error details:', errorText);
-      throw new Error(`API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('API Response received:', data);
-
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log('API Response received from SDK');
 
     if (!text) {
       console.warn('No text in API response, using dummy data');

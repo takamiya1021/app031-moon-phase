@@ -184,14 +184,18 @@ export default function MoonCanvas({ moonPhaseData, size = 400 }: MoonCanvasProp
 
   }, [moonPhaseData.moonAge, size]);
 
+  // レンダリングに必要な実際のサイズを計算
+  const radius = (size * 0.76) / 2;
+  const actualSize = Math.ceil(radius * 2);
+
   return (
     <div
       role="img"
       aria-label={`${moonPhaseData.phaseName}（月齢 ${moonPhaseData.moonAge.toFixed(1)}日）`}
-      className="relative overflow-hidden rounded-[32px] border border-[#101b34]/60 shadow-[0_30px_60px_rgba(2,4,14,0.85)]"
+      className="relative flex items-center justify-center rounded-lg overflow-hidden"
       style={{
-        width: `${size}px`,
-        height: `${size}px`,
+        width: actualSize,
+        height: actualSize,
         background: 'radial-gradient(circle at center, #0f1527 0%, #080c16 45%, #04060d 100%)'
       }}
     >
@@ -200,8 +204,11 @@ export default function MoonCanvas({ moonPhaseData, size = 400 }: MoonCanvasProp
         width={size}
         height={size}
         className="relative z-10"
+        style={{
+          width: actualSize,
+          height: actualSize
+        }}
       />
     </div>
   );
 }
-

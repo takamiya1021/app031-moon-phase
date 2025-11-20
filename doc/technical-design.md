@@ -169,9 +169,11 @@ const API_KEY_STORAGE_KEY = 'moon-app-api-key';
 localStorage.setItem(API_KEY_STORAGE_KEY, 'your-api-key-here');
 ```
 
-#### 5.1.2 APIクライアント
+#### 5.1.2 APIクライアント（SDK使用）
 ```typescript
 // lib/aiService.ts
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 export async function generateMoonContent(
   date: string,
   moonAge: number,
@@ -188,22 +190,25 @@ export async function generateMoonContent(
     return generateDummyContent(date, moonAge, phaseName);
   }
 
-  // Google AI Studio APIを使用（gemini-2.5-flash）
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: /* プロンプト */ }]
-        }]
-      })
-    }
-  );
+  // Google Generative AI SDK を使用
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const prompt = `
+    日付: ${date}
+    月齢: ${moonAge.toFixed(1)}日
+    月の名称: ${phaseName}
+
+    以下の3つのセクションで情報を生成してください：
+    【豆知識】月にまつわる神話・文化・科学的知識（150文字程度）
+    【運勢メッセージ】月の満ち欠けに合わせた癒し・前向きなメッセージ（100文字程度）
+    【観測アドバイス】月の観測に適した時間帯とヒント（100文字程度）
+  `;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const text = response.text();
+
   return parseAIResponse(text);
 }
 ```

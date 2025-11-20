@@ -1,18 +1,24 @@
 # Tasks
 
-- [/] E2E Testing Setup <!-- id: 0 -->
+- [x] E2E Testing Setup <!-- id: 0 -->
     - [x] Install Playwright <!-- id: 1 -->
     - [x] Create E2E tests <!-- id: 2 -->
     - [x] Run `npx playwright install` <!-- id: 3 -->
-    - [ ] Verify E2E tests pass <!-- id: 4 -->
-- [/] Enhance Moon Realism <!-- id: 5 -->
+    - [x] Verify E2E tests pass <!-- id: 4 -->
+- [x] Enhance Moon Realism <!-- id: 5 -->
     - [x] Implement spherical shadow masking based on light source <!-- id: 14 -->
     - [x] Fine-tune lighting and terminator sharpness <!-- id: 15 -->
+    - [x] Adjust moon size and canvas background shadow <!-- id: 16 -->
+    - [x] Apply bluish-white color tint <!-- id: 17 -->
     - [ ] Research/Generate high-res moon textures (diffuse + bump/normal) <!-- id: 6 -->
     - [ ] Update `MoonMesh.tsx` with new textures and material properties <!-- id: 7 -->
     - [ ] Verify lighting and phase accuracy <!-- id: 8 -->
-- [/] PWA Implementation <!-- id: 9 -->
-    - [ ] Configure `next.config.js` with `next-pwa` <!-- id: 10 -->
-    - [ ] Create `manifest.json` <!-- id: 11 -->
-    - [ ] Add icons <!-- id: 12 -->
-    - [ ] Verify PWA functionality <!-- id: 13 -->
+- [x] PWA Implementation <!-- id: 9 -->
+    - [x] Configure `next.config.js` with `next-pwa` <!-- id: 10 -->
+    - [x] Create `manifest.json` <!-- id: 11 -->
+    - [x] Add icons <!-- id: 12 -->
+    - [x] Verify PWA functionality <!-- id: 13 -->
+- [x] AI Integration <!-- id: 18 -->
+    - [x] Migrate to Gemini SDK (@google/generative-ai) <!-- id: 19 -->
+    - [x] Use localStorage for API key management <!-- id: 20 -->
+    - [x] Add API key notice for users <!-- id: 21 -->

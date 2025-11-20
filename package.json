@@ -12,6 +12,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@react-three/drei": "^9.114.5",
     "@react-three/fiber": "^8.15.17",
     "@react-three/postprocessing": "^3.0.4",

@@ -50,8 +50,8 @@ const fragmentShader = `
 
 const MoonMaskMaterial = shaderMaterial(
   {
-    map: undefined,
-    normalMap: undefined,
+    map: null,
+    normalMap: null,
     lightDir: new Vector3(0, 0, 1),
     illumination: 1,
     maskSoftness: 0.17,
@@ -65,7 +65,13 @@ extend({ MoonMaskMaterial });
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      moonMaskMaterial: ReactThreeFiber.Object3DNode<typeof MoonMaskMaterial, typeof MoonMaskMaterial>;
+      moonMaskMaterial: ReactThreeFiber.Object3DNode<typeof MoonMaskMaterial, typeof MoonMaskMaterial> & {
+        map?: any;
+        normalMap?: any;
+        lightDir?: Vector3;
+        illumination?: number;
+        maskSoftness?: number;
+      };
     }
   }
 }

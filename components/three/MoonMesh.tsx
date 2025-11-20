@@ -44,6 +44,7 @@ export default function MoonMesh({ illumination, lightDirection }: MoonMeshProps
     <group scale={MOON_SCALE}>
       <mesh castShadow receiveShadow rotation-y={Math.PI * 0.04}>
         <sphereGeometry args={[1, 256, 256]} />
+        {/* @ts-ignore - Custom shader material with extend */}
         <moonMaskMaterial
           map={moonTexture}
           normalMap={normalMap}

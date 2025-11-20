@@ -69,7 +69,7 @@ export default function MoonCanvas({ moonPhaseData, size = 400 }: MoonCanvasProp
     const img = imageRef.current;
     if (!canvas || !img) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
     const centerX = size / 2;

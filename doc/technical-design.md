@@ -162,42 +162,48 @@ function getMoonPhaseName(moonAge: number): string {
 
 ### 5.1 API設定
 
-#### 5.1.1 環境変数
-```env
-NEXT_PUBLIC_GOOGLE_AI_API_KEY=your-api-key-here
+#### 5.1.1 ローカルストレージ
+```typescript
+// APIキーはローカルストレージに保存
+const API_KEY_STORAGE_KEY = 'moon-app-api-key';
+localStorage.setItem(API_KEY_STORAGE_KEY, 'your-api-key-here');
 ```
 
 #### 5.1.2 APIクライアント
 ```typescript
 // lib/aiService.ts
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(
-  process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || ''
-);
-
 export async function generateMoonContent(
   date: string,
   moonAge: number,
   phaseName: string
 ): Promise<AIContent> {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  // ローカルストレージからAPIキーを取得
+  let apiKey: string | null = null;
+  if (typeof window !== 'undefined') {
+    apiKey = localStorage.getItem('moon-app-api-key');
+  }
 
-  const prompt = `
-    日付: ${date}
-    月齢: ${moonAge.toFixed(1)}日
-    月の名称: ${phaseName}
+  // APIキーが設定されていない場合はダミーデータを返す
+  if (!apiKey) {
+    return generateDummyContent(date, moonAge, phaseName);
+  }
 
-    以下の3つを生成してください：
-    1. 月にまつわる豆知識（神話・文化・科学）
-    2. この日の月に合わせた運勢メッセージ（癒し・前向き）
-    3. 月の観測アドバイス（時間帯・ヒント）
-  `;
+  // Google AI Studio APIを使用（gemini-2.5-flash）
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: /* プロンプト */ }]
+        }]
+      })
+    }
+  );
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   return parseAIResponse(text);
 }
 ```
@@ -457,11 +463,10 @@ const getCanvasSize = () => {
 - **Vercel**（Next.js最適化）
 - **Netlify**（代替）
 
-### 12.2 環境変数
-```env
-NEXT_PUBLIC_GOOGLE_AI_API_KEY=your-api-key
-NEXT_PUBLIC_APP_URL=https://moon-phase.vercel.app
-```
+### 12.2 APIキー設定
+- **ローカルストレージ使用**: 環境変数は使用しない
+- **設定方法**: アプリ内の「⚙️ 設定」ページから入力
+- **保存先**: `localStorage.setItem('moon-app-api-key', 'your-key')`
 
 ### 12.3 ビルド設定
 ```json

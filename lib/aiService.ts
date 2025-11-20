@@ -74,8 +74,20 @@ export async function generateMoonContent(
   moonAge: number,
   phaseName: string
 ): Promise<AIContent> {
-  // 環境変数からAPIキーを取得
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY;
+  // ローカルストレージからAPIキーを取得
+  let apiKey: string | null = null;
+
+  if (typeof window !== 'undefined') {
+    apiKey = localStorage.getItem('moon-app-api-key');
+  }
+
+  // デバッグログ
+  console.log('AI Service Debug:', {
+    hasApiKey: !!apiKey,
+    apiKeyPrefix: apiKey ? apiKey.substring(0, 10) + '...' : 'none',
+    isDefaultKey: apiKey === 'your-api-key-here',
+    isEmpty: apiKey === '',
+  });
 
   // APIキーが設定されていない場合はダミーデータを返す
   if (!apiKey || apiKey === 'your-api-key-here' || apiKey === '') {
@@ -86,10 +98,11 @@ export async function generateMoonContent(
   }
 
   try {
-    // Google AI Studio APIを使用（実際のAPI呼び出し）
-    // 注: @google/generative-ai パッケージは後でインストールする
+    console.log('Calling Google AI API...');
+
+    // Google AI Studio APIを使用（gemini-2.5-flashを使用）
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -122,13 +135,25 @@ export async function generateMoonContent(
       }
     );
 
+    console.log('API Response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('API error details:', errorText);
+      throw new Error(`API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('API Response received:', data);
+
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
+    if (!text) {
+      console.warn('No text in API response, using dummy data');
+      return generateDummyContent(date, moonAge, phaseName);
+    }
+
+    console.log('Successfully generated AI content');
     return parseAIResponse(text);
   } catch (error) {
     console.error('Error generating AI content:', error);

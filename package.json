@@ -8,14 +8,22 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@react-three/drei": "^9.114.5",
+    "@react-three/fiber": "^8.15.17",
+    "@react-three/postprocessing": "^3.0.4",
     "next": "14.2.18",
+    "next-pwa": "^5.6.0",
+    "postprocessing": "^6.38.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "three": "^0.165.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

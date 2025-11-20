@@ -14,28 +14,25 @@ describe('MoonCanvas', () => {
     illumination: 1,
   };
 
-  it('should render canvas element', () => {
+  it('should render accessible moon container', () => {
     render(<MoonCanvas moonPhaseData={mockMoonPhaseData} />);
 
-    const canvas = screen.getByRole('img');
-    expect(canvas).toBeInTheDocument();
-    expect(canvas.tagName).toBe('CANVAS');
+    const moon = screen.getByRole('img');
+    expect(moon).toBeInTheDocument();
   });
 
   it('should have correct canvas size', () => {
     render(<MoonCanvas moonPhaseData={mockMoonPhaseData} size={400} />);
 
-    const canvas = screen.getByRole('img') as HTMLCanvasElement;
-    expect(canvas.width).toBe(400);
-    expect(canvas.height).toBe(400);
+    const moon = screen.getByRole('img') as HTMLElement;
+    expect(moon).toHaveStyle({ width: '400px', height: '400px' });
   });
 
   it('should use default size if not provided', () => {
     render(<MoonCanvas moonPhaseData={mockMoonPhaseData} />);
 
-    const canvas = screen.getByRole('img') as HTMLCanvasElement;
-    expect(canvas.width).toBeGreaterThan(0);
-    expect(canvas.height).toBeGreaterThan(0);
+    const moon = screen.getByRole('img') as HTMLElement;
+    expect(moon).toHaveStyle({ width: '400px', height: '400px' });
   });
 
   it('should have accessible label', () => {

@@ -155,7 +155,7 @@ export default function MoonCanvas({ moonPhaseData, size = 400 }: MoonCanvasProp
 
         // 球体としての自然な明暗グラデーション
         const shadowBrightness = 0.12; // 影の明るさ
-        const litBrightness = 1.75; // 明るい部分の明るさ（控えめに）
+        const litBrightness = 1.9; // 明るい部分の明るさ（少し抑える）
 
         // ランバート反射（角度による明るさの変化）を強調
         // dotが1（垂直）→ 明るい、dotが0（斜め）→ 暗い、dotが-1（裏側）→ 影
@@ -172,17 +172,16 @@ export default function MoonCanvas({ moonPhaseData, size = 400 }: MoonCanvasProp
 
         // 明るさを計算（ランバート反射 × 遷移）
         // lambertFactorで球体の丸みによるグラデーション、smoothFactorで明暗境界
-        const sphericalShading = 0.4 + 0.6 * lambertFactor; // 球体の丸みによる明暗（0.4〜1.0）
+        // 0.6 + 0.4 * lambertFactor に変更して、斜めの部分も明るくする（コントラストを下げる）
+        const sphericalShading = 0.6 + 0.4 * lambertFactor;
 
-        // 垂直に近い部分（dot > 0.7）にさらに明るさブースト（控えめに）
-        const specularBoost = dot > 0.7 ? 1.0 + 0.12 * Math.pow((dot - 0.7) / 0.3, 2) : 1.0;
+        // specularBoost（ハイライト）は削除して、均一な明るさに近づける
+        const brightness = shadowBrightness + (litBrightness - shadowBrightness) * smoothFactor * sphericalShading;
 
-        const brightness = shadowBrightness + (litBrightness - shadowBrightness) * smoothFactor * sphericalShading * specularBoost;
-
-        // 色調補正（青白く冷たい色味に）
-        const colorR = 0.85;
-        const colorG = 0.95;
-        const colorB = 1.2;
+        // 色調補正（青白く冷たい色味に - #EAF4FCに近いバランス）
+        const colorR = 0.92;
+        const colorG = 0.96;
+        const colorB = 1.05;
 
         data[idx] = Math.min(255, texR * brightness * limbFactor * colorR);
         data[idx + 1] = Math.min(255, texG * brightness * limbFactor * colorG);

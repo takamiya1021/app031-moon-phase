@@ -9,11 +9,15 @@ export interface MoonPhaseData {
   illumination: number;   // 0-1 (0=新月, 1=満月)
 }
 
+/**
+ * AIが生成したコンテンツ
+ */
 export interface AIContent {
-  trivia: string;         // 豆知識
-  message: string;        // 運勢メッセージ
-  observation: string;    // 観測アドバイス
-  generatedAt: Date;
+  trivia: string; // 豆知識
+  observation: string; // 観測アドバイス
+  bodyCycle: string; // 心と体のサイクル（新規）
+  message: string; // 今日のメッセージ
+  generatedAt: Date; // 生成日時
 }
 
 export interface MoonHistory {

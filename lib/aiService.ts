@@ -13,13 +13,15 @@ import type { AIContent } from '@/types/moon';
 export function parseAIResponse(text: string): AIContent {
   // セクションを抽出する正規表現
   const triviaMatch = text.match(/【豆知識】\s*([\s\S]*?)(?=【|$)/);
-  const messageMatch = text.match(/【運勢メッセージ】\s*([\s\S]*?)(?=【|$)/);
   const observationMatch = text.match(/【観測アドバイス】\s*([\s\S]*?)(?=【|$)/);
+  const bodyCycleMatch = text.match(/【心と体のサイクル】\s*([\s\S]*?)(?=【|$)/);
+  const messageMatch = text.match(/【今日のメッセージ】\s*([\s\S]*?)(?=【|$)/);
 
   return {
     trivia: triviaMatch ? triviaMatch[1].trim() : text.substring(0, 200) || 'データを取得できませんでした。',
-    message: messageMatch ? messageMatch[1].trim() : 'データを取得できませんでした。',
     observation: observationMatch ? observationMatch[1].trim() : 'データを取得できませんでした。',
+    bodyCycle: bodyCycleMatch ? bodyCycleMatch[1].trim() : 'データを取得できませんでした。',
+    message: messageMatch ? messageMatch[1].trim() : 'データを取得できませんでした。',
     generatedAt: new Date(),
   };
 }
@@ -42,22 +44,29 @@ function generateDummyContent(
     `${phaseName}の時期は、古来より様々な文化で特別な意味を持つとされてきました。`,
   ];
 
-  const messageExamples = [
-    `${phaseName}の時期は、新しいことを始めるのに適した時期です。月のエネルギーを感じながら、ゆっくりと過ごしましょう。`,
-    `今日は${phaseName}。心を落ち着けて、自分自身と向き合う時間を持つと良いでしょう。`,
-    `${phaseName}のエネルギーは、前向きな変化をもたらします。今日一日を大切に過ごしてください。`,
-  ];
-
   const observationExamples = [
     `${phaseName}は夜空でよく見えます。天気が良ければ、ぜひ夜空を見上げてみてください。`,
     `月の観測は日没後や明け方が適しています。双眼鏡があると、より詳細に観察できます。`,
     `今日の月齢は${moonAge.toFixed(1)}日です。晴れた日には、月の表面の模様も観察できるかもしれません。`,
   ];
 
+  const bodyCycleExamples = [
+    `${phaseName}の時期は、体内リズムが変化しやすい時期です。十分な睡眠を取り、身体の声に耳を傾けましょう。`,
+    `月齢${moonAge.toFixed(1)}日は、心身のバランスを整えるのに適した時期です。リラックスできる時間を持つことをおすすめします。`,
+    `${phaseName}のエネルギーは、感情や直感に影響を与えるとされています。自分の内面と向き合う時間を大切にしてください。`,
+  ];
+
+  const messageExamples = [
+    `${phaseName}の時期は、新しいことを始めるのに適した時期です。月のエネルギーを感じながら、ゆっくりと過ごしましょう。`,
+    `今日は${phaseName}。心を落ち着けて、自分自身と向き合う時間を持つと良いでしょう。`,
+    `${phaseName}のエネルギーは、前向きな変化をもたらします。今日一日を大切に過ごしてください。`,
+  ];
+
   return {
     trivia: triviaExamples[Math.floor(Math.random() * triviaExamples.length)],
-    message: messageExamples[Math.floor(Math.random() * messageExamples.length)],
     observation: observationExamples[Math.floor(Math.random() * observationExamples.length)],
+    bodyCycle: bodyCycleExamples[Math.floor(Math.random() * bodyCycleExamples.length)],
+    message: messageExamples[Math.floor(Math.random() * messageExamples.length)],
     generatedAt: new Date(),
   };
 }
@@ -109,16 +118,19 @@ export async function generateMoonContent(
 月齢: ${moonAge.toFixed(1)}日
 月の名称: ${phaseName}
 
-以下の3つのセクションで、月にまつわる情報を生成してください：
+以下の4つのセクションで、月にまつわる情報を生成してください：
 
 【豆知識】
 その日の月に関連する神話・文化・科学的知識を150文字程度で
 
-【運勢メッセージ】
-月の満ち欠けに合わせた癒し・前向きなメッセージを100文字程度で
-
 【観測アドバイス】
-月の観測に適した時間帯とヒントを100文字程度で`;
+月の観測に適した時間帯とヒントを100文字程度で
+
+【心と体のサイクル】
+月の満ち欠けと人間の心身のサイクル（体内リズム、メンタル、感情など）との関連性について150文字程度で
+
+【今日のメッセージ】
+月の満ち欠けに合わせた癒し・前向きなメッセージを100文字程度で`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;

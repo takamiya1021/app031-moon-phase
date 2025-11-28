@@ -153,21 +153,31 @@ export default function MoonCanvas({ moonPhaseData, size = 400 }: MoonCanvasProp
         const texG = data[idx + 1];
         const texB = data[idx + 2];
 
-        // 滑らかな明暗の遷移（指数関数的なフォールオフ）
+        // 球体としての自然な明暗グラデーション
         const shadowBrightness = 0.12; // 影の明るさ
-        const litBrightness = 1.5; // 明るい部分の明るさ（より明るく）
+        const litBrightness = 1.75; // 明るい部分の明るさ（控えめに）
 
-        // 境界線の遷移幅を狭くする
-        const transitionZone = 0.18; // 遷移が起きる範囲（狭める）
+        // ランバート反射（角度による明るさの変化）を強調
+        // dotが1（垂直）→ 明るい、dotが0（斜め）→ 暗い、dotが-1（裏側）→ 影
+        const lambertFactor = Math.max(0, dot); // 0〜1の範囲
 
-        // dotを遷移ゾーン内で0〜1に正規化
+        // 境界線の遷移幅
+        const transitionZone = 0.18;
+
+        // dotを遷移ゾーン内で0〜1に正規化（影か光か）
         const normalizedDot = Math.max(0, Math.min(1, (dot + transitionZone) / (2 * transitionZone)));
 
-        // 高いべき乗でシャープな遷移を作る
-        const smoothFactor = Math.pow(normalizedDot, 5.0);
+        // 穏やかなべき乗でシャープさを残しつつ、滑らかな遷移を作る
+        const smoothFactor = Math.pow(normalizedDot, 2.5);
 
-        // 明るさを計算
-        const brightness = shadowBrightness + (litBrightness - shadowBrightness) * smoothFactor;
+        // 明るさを計算（ランバート反射 × 遷移）
+        // lambertFactorで球体の丸みによるグラデーション、smoothFactorで明暗境界
+        const sphericalShading = 0.4 + 0.6 * lambertFactor; // 球体の丸みによる明暗（0.4〜1.0）
+
+        // 垂直に近い部分（dot > 0.7）にさらに明るさブースト（控えめに）
+        const specularBoost = dot > 0.7 ? 1.0 + 0.12 * Math.pow((dot - 0.7) / 0.3, 2) : 1.0;
+
+        const brightness = shadowBrightness + (litBrightness - shadowBrightness) * smoothFactor * sphericalShading * specularBoost;
 
         // 色調補正（青白く冷たい色味に）
         const colorR = 0.85;

@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "月の満ち欠け表示",
   description: "今日の月の満ち欠けを確認できるアプリ",
   manifest: "/manifest.json",
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
